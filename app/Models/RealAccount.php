@@ -9,7 +9,7 @@ class RealAccount extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'username', 'counter', 'category'];
+    protected $fillable = ['user_id', 'username', 'counter', 'category','status'];
 
     public function user()
     {

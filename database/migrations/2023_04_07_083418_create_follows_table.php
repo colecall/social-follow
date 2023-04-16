@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('fake_account_id');
             $table->unsignedBigInteger('real_account_id');
             $table->string('type');
-            $table->enum('status', ['pending', 'confirmed'])->default('pending');
+            $table->enum('status', ['pending', 'confirmed','back'])->default('pending');
             $table->unsignedBigInteger('back_id')->nullable();
             $table->timestamps();
 

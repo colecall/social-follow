@@ -5,7 +5,7 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-body">
-                        <h3>{{ _('Fake Account') }}</h3>
+                        <h3>{{ 'oke' ?? _('Fake Account') }}</h3>
                         <hr>
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                             data-bs-target="#fakeAccountModal">
