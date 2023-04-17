@@ -18,52 +18,57 @@ class FollowController extends Controller
 
     public function followInstagram()
     {
+        /* 
+         * Goals API
+         * 
+         * $list :
+         * [
+         *      {
+         *          real_accounts: 
+         *          {
+         *              id:
+         *              username:
+         *          },
+         *          elligible_fake_accounts:
+         *          [
+         *              user1: 
+         *              {
+         *                  id:
+         *                  username:
+         *              },
+         *              user2:
+         *              {
+         *                  id:
+         *                  username:
+         *              },
+         *              user(n) { ... }
+         *          ]
+         *      },
+         *      ...
+         * ]
+         * 
+         *  $list->real_accounts->id
+         *  $list->real_accounts->username
+         * 
+         *  $list->elligible_fake_accounts['user1']->id
+         *  $list->elligible_fake_accounts['user1']->username
+         * 
+        */
         // Mengambil user yang sedang login
         $user = Auth::user();
-
+        if (auth()->user()->realAccounts->count() < 1) {
+            return redirect()->route('real.account')->with('error', 'Harus memiliki real account minimal 1');
+        }
         // Mengambil daftar real account kategori follow instagram
-        $realInstagramAccount = RealAccount::where('category', 'Follow Instagram Account')->where('user_id','!=',auth()->user()->id)->get()->each(function($query){$query->total_fake_account_dia= $query->user->fakeAccounts->count();});
+        $realInstagramAccount = RealAccount::where('category', 'Follow Instagram Account')->where('user_id', '!=', auth()->user()->id)->get()->each(function ($query) {
+            $query->total_fake_account_dia = $query->user->fakeAccounts->count();
+            $query->account_used = $query->follow->where('user_id', auth()->user()->id)->count();
+        });
         // Mengambil daftar fake account milik user yang sedang login
-        $fakeInstagram = FakeAccount::where('social_media', 'Instagram')->with('fl')->where('user_id', $user->id)->get()->filter(function($query){
+        $fakeInstagram = FakeAccount::where('social_media', 'Instagram')->with('fl')->where('user_id', $user->id)->get()->filter(function ($query) {
             // echo  count($query->fl) < 1
             return true;
         });
-        // dd($fakeInstagram->toArray(),$realInstagramAccount->toArray());
-        // Looping untuk setiap real account dan mencari daftar fake account yang belum follow real account
-        // foreach ($realInstagramAccount as $realUser) {
-        //     // Mendapatkan id real user
-        //     $realUserId = $realUser->id;
-
-        //     // Mengambil daftar fake user yang belum mengikuti real user
-        //     $fakeUsers = FakeAccount::whereNotIn('id', function ($query) use ($realUserId) {
-        //         $query->select('fake_account_id')
-        //             ->from('follows')
-        //             ->where('real_account_id', $realUserId);
-        //     })->where('user_id', $user->id)->where('social_media', 'Instagram')->get(); // Menambahkan kondisi where category = Instagram
-
-        //     // Membuat array kosong untuk menyimpan fake user yang belum follow real user
-        //     $unfollowedFakeUsers = [];
-
-        //     // Looping untuk setiap fake user dan memeriksa apakah mereka sudah follow real user
-        //     foreach ($fakeUsers as $fakeUser) {
-        //         $followed = Follow::where('fake_account_id', $fakeUser->id)
-        //             ->where('real_account_id', $realUserId)
-        //             ->exists();
-
-        //         if (!$followed) {
-        //             // Jika belum follow, tambahkan fake user ke dalam array kosong
-        //             $unfollowedFakeUsers[] = $fakeUser;
-        //         }
-        //     }
-
-        //     // Menambahkan daftar fake user ke real user sebagai properti baru
-        //     $realUser->fakeUsers = $unfollowedFakeUsers;
-        // }
-        // dd($realInstagramAccount->toArray());
-            // dd($realInstagramAccount)
-            // $oke =[1,2,3,4];
-            // dd(Arr::join($oke,''));
-        // Menampilkan view follow instagram dengan daftar real account dan fake account
         return view('instagram.follow', compact('realInstagramAccount', 'fakeInstagram'));
     }
 
@@ -459,7 +464,7 @@ class FollowController extends Controller
 
     public function follback(Request $request)
     {
-        
+
         // $follow = new Follow;
         // $follow->user_id = Auth::user()->id;
         // $follow->real_account_id = $request->real_account_id;
@@ -470,12 +475,12 @@ class FollowController extends Controller
         // $follow->save();
 
         $follow = Follow::create([
-            'user_id'=> Auth::user()->id,
-            'real_account_id'=> $request->real_account_id,
-            'fake_account_id'=> $request->back_id,
+            'user_id' => Auth::user()->id,
+            'real_account_id' => $request->real_account_id,
+            'fake_account_id' => $request->back_id,
             'back_id' => $request->back_id,
-            'type'=>$request->type,
-            'status'=>'back'
+            'type' => $request->type,
+            'status' => 'back'
         ]);
 
         $id = $request->id;
@@ -532,3 +537,37 @@ class FollowController extends Controller
         //
     }
 }
+
+
+
+// dd($fakeInstagram->toArray(),$realInstagramAccount->toArray());
+// Looping untuk setiap real account dan mencari daftar fake account yang belum follow real account
+// foreach ($realInstagramAccount as $realUser) {
+//     // Mendapatkan id real user
+//     $realUserId = $realUser->id;
+//     // Mengambil daftar fake user yang belum mengikuti real user
+//     $fakeUsers = FakeAccount::whereNotIn('id', function ($query) use ($realUserId) {
+//         $query->select('fake_account_id')
+//             ->from('follows')
+//             ->where('real_account_id', $realUserId);
+//     })->where('user_id', $user->id)->where('social_media', 'Instagram')->get(); // Menambahkan kondisi where category = Instagram
+//     // Membuat array kosong untuk menyimpan fake user yang belum follow real user
+//     $unfollowedFakeUsers = [];
+//     // Looping untuk setiap fake user dan memeriksa apakah mereka sudah follow real user
+//     foreach ($fakeUsers as $fakeUser) {
+//         $followed = Follow::where('fake_account_id', $fakeUser->id)
+//             ->where('real_account_id', $realUserId)
+//             ->exists();
+//         if (!$followed) {
+//             // Jika belum follow, tambahkan fake user ke dalam array kosong
+//             $unfollowedFakeUsers[] = $fakeUser;
+//         }
+//     }
+//     // Menambahkan daftar fake user ke real user sebagai properti baru
+//     $realUser->fakeUsers = $unfollowedFakeUsers;
+// }
+// dd($realInstagramAccount->toArray());
+// dd($realInstagramAccount)
+// $oke =[1,2,3,4];
+// dd(Arr::join($oke,''));
+// Menampilkan view follow instagram dengan daftar real account dan fake account
