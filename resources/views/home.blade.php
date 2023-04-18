@@ -144,10 +144,33 @@
                                                             <select id="fake_account_id" name="back_id"
                                                                 class="form-control @error('fake_account_id') is-invalid @enderror"
                                                                 required>
-                                                                <option value="">-- Select Fake User --</option>
-                                                                @foreach ($fakeUser as $itemFake)
-                                                                    <option value="{{ $itemFake->id }}">
-                                                                        {{ $itemFake->username }}</option>
+                                                                <option value="">-- Select Fake User --
+                                                                    {{ $item->fakeAccount->User->realAccounts->where('category', $item->realAccount->category)->where('status', 'active')->first()->id }}
+                                                                </option>
+                                                                @foreach ($fakeUsers as $fakeUser)
+                                                                    use
+                                                                    ($item->fakeAccount->User->realAccounts->where('category',
+                                                                    $item->realAccount->category)->where('status',
+                                                                    'active')->first()->id)
+                                                                    @foreach ($fakeUser->fl as $UserFL)
+                                                                        use
+                                                                        ($item->fakeAccount->User->realAccounts->where('category',
+                                                                        $item->realAccount->category)->where('status',
+                                                                        'active')->first()->id)
+                                                                        @php
+                                                                            if (
+                                                                                $item->fakeAccount->User->realAccounts
+                                                                                    ->where('category', $item->realAccount->category)
+                                                                                    ->where('status', 'active')
+                                                                                    ->first()->id === $UserFL->real_account_id &&
+                                                                                $UserFL->back_id !== null
+                                                                            ) {
+                                                                                continue 2;
+                                                                            }
+                                                                        @endphp
+                                                                    @endforeach
+                                                                    <option value="{{ $fakeUser->id }}">
+                                                                        {{ $fakeUser->username }}</option>
                                                                 @endforeach
                                                             </select>
                                                             <button type="submit"

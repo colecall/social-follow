@@ -17,15 +17,16 @@ class Dashboard extends Controller
     public function index()
     {
         $userId = Auth::id();
-        $fakeUser = FakeAccount::where('user_id', $userId)->get();
+        $fakeUsers = FakeAccount::with('fl')->where('user_id', $userId)->get();
         $realUser = RealAccount::all();
         $waitingList = Follow::with('realAccount.user')
             ->where('status', 'pending')
             ->whereHas('realAccount', function ($query) use ($userId) {
-                $query->where('user_id', $userId);
+                $query->where('user_id', $userId)->whereNull('back_id');
             })
             ->get();
-        return view('home', compact('fakeUser', 'realUser', 'waitingList', 'fakeUser'));
+         // dd($fakeUsers->toArray(),$realUser->toArray(),$waitingList->toArray());
+        return view('home', compact('realUser', 'waitingList', 'fakeUsers'));
     }
 
     public function history()

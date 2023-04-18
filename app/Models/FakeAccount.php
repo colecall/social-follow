@@ -9,7 +9,7 @@ class FakeAccount extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'social_media', 'username'];
+    protected $fillable = ['user_id', 'social_media', 'username','status'];
 
     public function user()
     {
@@ -22,6 +22,10 @@ class FakeAccount extends Model
     }
 
     public function follows()
+    {
+        return $this->hasMany(Follow::class);
+    }
+    public function fl()
     {
         return $this->hasMany(Follow::class);
     }

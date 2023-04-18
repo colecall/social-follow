@@ -104,11 +104,12 @@ class RealAccountController extends Controller
         $request->validate([
             'username' => 'required|string|max:255|unique:real_accounts',
         ]);
-
+        // dd($request->all());
         RealAccount::create([
             'user_id' => Auth::user()->id,
             'username' => $request->username,
             'counter' => 0,
+            'status'=> 'active',
             'category' => $request->category,
         ]);
 
